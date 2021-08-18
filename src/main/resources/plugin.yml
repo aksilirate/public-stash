@@ -1,0 +1,7 @@
+name: PublicStash
+version: ${project.version}
+main: me.axilirate.publicstash.PublicStash
+api-version: 1.17
+commands:
+  ps:
+    usage: /<command>
