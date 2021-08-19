@@ -25,6 +25,7 @@ public class DataManager {
 
         yaml_file.set(Integer.toString(index), inventory);
 
+        saveYamlFile(file, yaml_file);
     }
 
 
