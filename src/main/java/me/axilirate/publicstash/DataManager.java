@@ -4,9 +4,11 @@ import me.axilirate.publicstash.items.Back;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 
 public class DataManager {
 
@@ -20,10 +22,12 @@ public class DataManager {
 
 
     public void setYamlInventory(int index, Inventory inventory){
-        File file = new File(publicStash.getDataFolder() + "data.yml");
+        File file = new File(publicStash.getDataFolder() + "/data.yml");
         YamlConfiguration yaml_file = YamlConfiguration.loadConfiguration(file);
 
-        yaml_file.set(Integer.toString(index), inventory);
+
+        yaml_file.set(Integer.toString(index), inventory.getStorageContents());
+
 
         saveYamlFile(file, yaml_file);
     }
@@ -31,17 +35,18 @@ public class DataManager {
 
 
     public Inventory getYamlInventory(int index){
-        File file = new File(publicStash.getDataFolder() + "data.yml");
+        File file = new File(publicStash.getDataFolder() + "/data.yml");
         YamlConfiguration yaml_file = YamlConfiguration.loadConfiguration(file);
 
-        Inventory inventory = (Inventory) yaml_file.get(Integer.toString(index));
+        ArrayList<ItemStack> itemStackArrayList = (ArrayList<ItemStack>) yaml_file.get(Integer.toString(index));
+
+        Inventory inventory = Bukkit.createInventory(null, 54, "Stash " + (index + 1) );
 
 
-
-        if (inventory == null){
-            inventory = Bukkit.createInventory(null, 54, "Stash " + (index + 1) );
-            inventory.setItem(45, Back.getItem());
+        for(int i = 0; i < itemStackArrayList.size(); i++){
+            inventory.setItem(i, itemStackArrayList.get(i));
         }
+
 
         inventory.setItem(45, Back.getItem());
 

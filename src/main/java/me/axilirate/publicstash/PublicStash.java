@@ -25,6 +25,14 @@ public final class PublicStash extends JavaPlugin {
     public void onEnable() {
 
 
+
+        if (!getDataFolder().exists()) {
+            if (getDataFolder().mkdirs()) {
+                getLogger().info("Data dir was created.");
+            }
+        }
+
+
         getServer().getPluginManager().registerEvents(new EventListener(this), this);
         this.getCommand("ps").setExecutor(new ps(this));
 
@@ -50,14 +58,17 @@ public final class PublicStash extends JavaPlugin {
     }
 
 
+    public void saveAllStash(){
+        for (int i = 0; i < stashList.size(); i++){
+            dataManager.setYamlInventory(i, stashList.get(i));
+        }
+    }
 
 
     @Override
     public void onDisable() {
 
-        for (int i = 0; i < stashList.size(); i++){
-            dataManager.setYamlInventory(i, stashList.get(i));
-        }
+        saveAllStash();
 
 
     }
