@@ -3,6 +3,7 @@ package me.axilirate.publicstash;
 import me.axilirate.publicstash.commands.ps;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -15,14 +16,33 @@ public final class PublicStash extends JavaPlugin {
 
     public DataManager dataManager = new DataManager(this);
 
-    public Inventory publicStashInventory = Bukkit.createInventory(null, 9, "Public Stash");
+    public Inventory publicStashInventory;
 
     public List<Inventory> stashList = new ArrayList<>();
 
-
+    public int inventorySize = 9;
+    public boolean despawnedItemsToStash = true;
 
     @Override
     public void onEnable() {
+
+        FileConfiguration config = this.getConfig();
+
+
+        int stashAmount = config.getInt("stash-amount");
+
+        if (stashAmount != 0){
+            inventorySize = (int) Math.ceil( (float) stashAmount / 9) * 9;
+        }
+
+        publicStashInventory = Bukkit.createInventory(null, inventorySize, "Public Stash");
+
+
+        config.addDefault("stash-amount", 9);
+        config.addDefault("despawned-items-to-stash", true);
+        config.options().copyDefaults(true);
+        saveConfig();
+
 
 
 
@@ -39,7 +59,7 @@ public final class PublicStash extends JavaPlugin {
 
 
 
-        for (int i = 0; i < 9; i++){
+        for (int i = 0; i < stashAmount; i++){
 
             ItemStack chest = new ItemStack(Material.CHEST);
             ItemMeta chestMeta = chest.getItemMeta();

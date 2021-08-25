@@ -42,11 +42,11 @@ public class DataManager {
 
         Inventory inventory = Bukkit.createInventory(null, 54, "Stash " + (index + 1) );
 
-
-        for(int i = 0; i < itemStackArrayList.size(); i++){
-            inventory.setItem(i, itemStackArrayList.get(i));
+        if (itemStackArrayList != null){
+            for(int i = 0; i < itemStackArrayList.size(); i++){
+                inventory.setItem(i, itemStackArrayList.get(i));
+            }
         }
-
 
         inventory.setItem(45, Back.getItem());
 

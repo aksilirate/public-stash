@@ -19,6 +19,11 @@ public class EventListener implements Listener {
     }
 
 
+
+
+
+
+
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
         Player player = (Player) event.getWhoClicked();
@@ -57,7 +62,14 @@ public class EventListener implements Listener {
 
     @EventHandler
     public void onItemDespawn(ItemDespawnEvent event) {
+
+        if (!publicStash.despawnedItemsToStash){
+            return;
+        }
+
         ItemStack itemStack = event.getEntity().getItemStack();
+
+
 
         for (int i = 0; i < publicStash.stashList.size(); i++) {
 
