@@ -4,24 +4,33 @@ import me.axilirate.publicstash.commands.ps;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.File;
+import java.util.HashMap;
 
 public final class PublicStash extends JavaPlugin {
 
     public DataManager dataManager = new DataManager(this);
 
-    public Inventory publicStashInventory;
+    public HashMap<Player,Inventory> playersOpenedStash = new HashMap<>();
 
-    public List<Inventory> stashList = new ArrayList<>();
+    public HashMap<Player,Integer> playersOpenedStashIndex = new HashMap<>();
+
 
     public int inventorySize = 9;
+    public int stashAmount;
     public boolean despawnedItemsToStash = true;
+
+
+    File translationFile = new File(this.getDataFolder() + "/language.yml");
+    YamlConfiguration translationYml = YamlConfiguration.loadConfiguration(translationFile);
+
 
     @Override
     public void onEnable() {
@@ -29,13 +38,12 @@ public final class PublicStash extends JavaPlugin {
         FileConfiguration config = this.getConfig();
 
 
-        int stashAmount = config.getInt("stash-amount");
+        stashAmount = config.getInt("stash-amount");
 
         if (stashAmount != 0){
             inventorySize = (int) Math.ceil( (float) stashAmount / 9) * 9;
         }
 
-        publicStashInventory = Bukkit.createInventory(null, inventorySize, "Public Stash");
 
 
         config.addDefault("stash-amount", 9);
@@ -45,12 +53,29 @@ public final class PublicStash extends JavaPlugin {
 
 
 
-
-        if (!getDataFolder().exists()) {
-            if (getDataFolder().mkdirs()) {
-                getLogger().info("Data dir was created.");
-            }
+        if (translationYml.get("default.public-stash-title") == null){
+            translationYml.set("default.public-stash-title", "Public Stash");
         }
+
+        if (translationYml.get("en_us.public-stash-title") == null){
+            translationYml.set("en_us.public-stash-title", "Public Stash");
+        }
+
+
+
+        if (translationYml.get("default.stash-name") == null){
+            translationYml.set("default.stash-name", "Stash");
+        }
+
+
+        if (translationYml.get("en_us.stash-name") == null){
+            translationYml.set("en_us.stash-name", "Stash");
+        }
+
+
+
+        dataManager.saveYamlFile(translationFile, translationYml);
+
 
 
         getServer().getPluginManager().registerEvents(new EventListener(this), this);
@@ -59,37 +84,91 @@ public final class PublicStash extends JavaPlugin {
 
 
 
+    }
+
+
+
+
+
+
+    public void openPublicStash(Player player){
+
+        String language = player.getLocale();
+
+        String title = translationYml.getString(language + ".public-stash-title" );
+
+        if (title == null){
+            title = translationYml.getString("default.public-stash-title");
+        }
+
+
+        Inventory publicStashInventory = Bukkit.createInventory(player, inventorySize, title);
+
+
+        ItemStack chest = new ItemStack(Material.CHEST);
+        ItemMeta chestMeta = chest.getItemMeta();
+
+
+        String stashTitle = translationYml.getString(language + ".stash-name" );
+
+        if (stashTitle == null){
+            stashTitle = translationYml.getString("default.stash-name");
+        }
+
+
+
         for (int i = 0; i < stashAmount; i++){
 
-            ItemStack chest = new ItemStack(Material.CHEST);
-            ItemMeta chestMeta = chest.getItemMeta();
-            chestMeta.setDisplayName("Stash " + (i + 1));
+            chestMeta.setDisplayName(stashTitle + " " + (i + 1));
             chest.setItemMeta(chestMeta);
 
-
             publicStashInventory.setItem(i, chest);
-            stashList.add(dataManager.getYamlInventory(i));
-
 
         }
+
+
+        player.openInventory(publicStashInventory);
+        playersOpenedStash.put(player, publicStashInventory);
 
 
 
     }
 
 
-    public void saveAllStash(){
-        for (int i = 0; i < stashList.size(); i++){
-            dataManager.setYamlInventory(i, stashList.get(i));
+
+
+    public void updateStashItem(int stashIndex, int itemIndex, ItemStack stashItem){
+
+        for (Player player: playersOpenedStashIndex.keySet()){
+            if (stashIndex == playersOpenedStashIndex.get(player)){
+                player.getOpenInventory().getTopInventory().setItem(itemIndex, stashItem);
+            }
         }
+
+
+
+
     }
 
+
+    public void updateStashInventory(int stashIndex){
+
+        for (Player player: playersOpenedStashIndex.keySet()){
+
+            if (stashIndex == playersOpenedStashIndex.get(player)){
+
+                Inventory stashInventory = dataManager.getYamlInventory(player, stashIndex);
+                for (int itemIndex = 0; itemIndex < stashInventory.getSize(); itemIndex++){
+                    player.getOpenInventory().getTopInventory().setItem(itemIndex, stashInventory.getItem(itemIndex));
+                }
+
+            }
+        }
+    }
 
     @Override
     public void onDisable() {
 
-        saveAllStash();
-
-
     }
+
 }
