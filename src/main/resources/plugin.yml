@@ -4,4 +4,5 @@ main: me.axilirate.publicstash.PublicStash
 api-version: 1.17
 commands:
   ps:
+    permission: publicstash.ps.use
     usage: /<command>

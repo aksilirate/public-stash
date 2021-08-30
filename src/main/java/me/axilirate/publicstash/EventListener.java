@@ -11,7 +11,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 
-
 public class EventListener implements Listener {
 
     private final PublicStash publicStash;
@@ -37,7 +36,7 @@ public class EventListener implements Listener {
 
         if (publicStash.playersOpenedStashIndex.containsKey(player)) {
 
-            if (itemsTaken){
+            if (itemsTaken) {
                 event.setCancelled(true);
                 return;
             }
@@ -61,11 +60,11 @@ public class EventListener implements Listener {
 
                 publicStash.dataManager.setYamlInventory(stashIndex, player.getOpenInventory().getTopInventory());
 
-                Bukkit.getScheduler().runTaskLater(publicStash, () -> {itemsTaken = false;}, 20 );
+                Bukkit.getScheduler().runTaskLater(publicStash, () -> {
+                    itemsTaken = false;
+                }, 20);
 
             }, 1);
-
-
 
 
         }
@@ -102,7 +101,7 @@ public class EventListener implements Listener {
 
         if (publicStash.playersOpenedStashIndex.containsKey(player)) {
 
-            if (itemsTaken){
+            if (itemsTaken) {
                 event.setCancelled(true);
                 return;
             }
@@ -118,12 +117,11 @@ public class EventListener implements Listener {
 
                 publicStash.dataManager.setYamlInventory(stashIndex, player.getOpenInventory().getTopInventory());
 
-                Bukkit.getScheduler().runTaskLater(publicStash, () -> {itemsTaken = false;}, 20 );
+                Bukkit.getScheduler().runTaskLater(publicStash, () -> {
+                    itemsTaken = false;
+                }, 20);
 
             }, 1);
-
-
-
 
 
         }
@@ -145,12 +143,11 @@ public class EventListener implements Listener {
             Inventory stashInventory = publicStash.dataManager.getYamlInventory(null, stashIndex);
 
             for (int itemIndex = 0; itemIndex < 54; itemIndex++) {
-                if (stashInventory.getItem(itemIndex) == null) {
-                    continue;
-                }
 
-                if (stashInventory.getItem(itemIndex).getType().equals(itemStack.getType()) && stashInventory.getItem(itemIndex).getAmount() + itemStack.getAmount() > 64) {
-                    continue;
+                if (stashInventory.getItem(itemIndex) != null) {
+                    if (stashInventory.getItem(itemIndex).getType().equals(itemStack.getType()) && stashInventory.getItem(itemIndex).getAmount() + itemStack.getAmount() > 64) {
+                        continue;
+                    }
                 }
 
                 stashInventory.addItem(itemStack);
