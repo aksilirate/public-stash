@@ -151,7 +151,7 @@ public class EventListener implements Listener {
                 }
 
                 stashInventory.addItem(itemStack);
-                publicStash.dataManager.setYamlItemStack(stashIndex, itemIndex, itemStack);
+                publicStash.dataManager.setYamlInventory(stashIndex, stashInventory);
                 return;
 
             }

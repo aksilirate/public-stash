@@ -26,6 +26,7 @@ public final class PublicStash extends JavaPlugin {
     public int inventorySize = 9;
     public int stashAmount;
     public boolean despawnedItemsToStash = true;
+    public String stashItemType = "CHEST";
 
 
     File translationFile = new File(this.getDataFolder() + "/language.yml");
@@ -37,20 +38,24 @@ public final class PublicStash extends JavaPlugin {
 
         FileConfiguration config = this.getConfig();
 
+        config.addDefault("stash-amount", 9);
+        config.addDefault("despawned-items-to-stash", true);
+        config.addDefault("stash-item-type", "CHEST");
+
+
+        config.options().copyDefaults(true);
+        saveConfig();
+
+
 
         stashAmount = config.getInt("stash-amount");
+        despawnedItemsToStash = config.getBoolean("despawned-items-to-stash");
+        stashItemType = config.getString("stash-item-type");
+
 
         if (stashAmount != 0){
             inventorySize = (int) Math.ceil( (float) stashAmount / 9) * 9;
         }
-
-
-
-        config.addDefault("stash-amount", 9);
-        config.addDefault("despawned-items-to-stash", true);
-        config.options().copyDefaults(true);
-        saveConfig();
-
 
 
         if (translationYml.get("default.public-stash-title") == null){
@@ -105,8 +110,8 @@ public final class PublicStash extends JavaPlugin {
         Inventory publicStashInventory = Bukkit.createInventory(player, inventorySize, title);
 
 
-        ItemStack chest = new ItemStack(Material.CHEST);
-        ItemMeta chestMeta = chest.getItemMeta();
+        ItemStack stashItem = new ItemStack(Material.getMaterial(stashItemType));
+        ItemMeta stashItemMeta = stashItem.getItemMeta();
 
 
         String stashTitle = translationYml.getString(language + ".stash-name" );
@@ -119,10 +124,10 @@ public final class PublicStash extends JavaPlugin {
 
         for (int i = 0; i < stashAmount; i++){
 
-            chestMeta.setDisplayName(stashTitle + " " + (i + 1));
-            chest.setItemMeta(chestMeta);
+            stashItemMeta.setDisplayName(stashTitle + " " + (i + 1));
+            stashItem.setItemMeta(stashItemMeta);
 
-            publicStashInventory.setItem(i, chest);
+            publicStashInventory.setItem(i, stashItem);
 
         }
 
