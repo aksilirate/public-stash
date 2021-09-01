@@ -1,10 +1,13 @@
 package me.axilirate.publicstash.commands;
 
 import me.axilirate.publicstash.PublicStash;
+import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.PluginDescriptionFile;
+
 public class ps implements CommandExecutor {
 
     public PublicStash publicStash;
@@ -19,12 +22,23 @@ public class ps implements CommandExecutor {
         if (sender instanceof Player) {
             Player player = (Player) sender;
 
-            switch (args.length){
+            switch (args.length) {
 
                 case 0:
 
                     publicStash.openPublicStash(player);
 
+                case 1:
+
+                    if (!player.hasPermission("publicstash.version.use")){
+                        player.sendMessage(ChatColor.RED +  "You don't have permission to use that command");
+                        return true;
+                    }
+
+                    if (args[0].equalsIgnoreCase("version")) {
+                        PluginDescriptionFile pdf = publicStash.getDescription();
+                        player.sendMessage(pdf.getVersion());
+                    }
             }
 
         }
