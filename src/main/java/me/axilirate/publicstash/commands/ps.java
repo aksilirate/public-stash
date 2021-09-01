@@ -22,24 +22,25 @@ public class ps implements CommandExecutor {
         if (sender instanceof Player) {
             Player player = (Player) sender;
 
-            switch (args.length) {
 
-                case 0:
-
-                    publicStash.openPublicStash(player);
-
-                case 1:
-
-                    if (!player.hasPermission("publicstash.version.use")){
-                        player.sendMessage(ChatColor.RED +  "You don't have permission to use that command");
-                        return true;
-                    }
-
-                    if (args[0].equalsIgnoreCase("version")) {
-                        PluginDescriptionFile pdf = publicStash.getDescription();
-                        player.sendMessage(pdf.getVersion());
-                    }
+            if (args.length == 0) {
+                publicStash.openPublicStash(player);
+                return true;
             }
+
+
+            if (args.length == 1) {
+                if (!player.hasPermission("publicstash.version.use")) {
+                    player.sendMessage(ChatColor.RED + "You don't have permission to use that command");
+                    return true;
+                }
+
+                if (args[0].equalsIgnoreCase("version")) {
+                    PluginDescriptionFile pdf = publicStash.getDescription();
+                    player.sendMessage(pdf.getVersion());
+                }
+            }
+
 
         }
 

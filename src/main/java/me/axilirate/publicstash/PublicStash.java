@@ -27,6 +27,7 @@ public final class PublicStash extends JavaPlugin {
     public int stashAmount;
     public boolean despawnedItemsToStash = true;
     public String stashItemType = "CHEST";
+    public boolean debugModeEnabled = false;
 
 
     File translationFile = new File(this.getDataFolder() + "/language.yml");
@@ -41,6 +42,7 @@ public final class PublicStash extends JavaPlugin {
         config.addDefault("stash-amount", 9);
         config.addDefault("despawned-items-to-stash", true);
         config.addDefault("stash-item-type", "CHEST");
+        config.addDefault("debug-mode-enabled", false);
 
 
         config.options().copyDefaults(true);
@@ -51,10 +53,16 @@ public final class PublicStash extends JavaPlugin {
         stashAmount = config.getInt("stash-amount");
         despawnedItemsToStash = config.getBoolean("despawned-items-to-stash");
         stashItemType = config.getString("stash-item-type");
+        debugModeEnabled = config.getBoolean("debug-mode-enabled");
 
 
         if (stashAmount != 0){
             inventorySize = (int) Math.ceil( (float) stashAmount / 9) * 9;
+        }
+
+        if (debugModeEnabled){
+            System.out.println("Stash amount is set to " + stashAmount);
+            System.out.println("Inventory size is set to " + inventorySize);
         }
 
 
