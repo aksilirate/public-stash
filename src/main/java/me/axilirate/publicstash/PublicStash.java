@@ -1,7 +1,9 @@
 package me.axilirate.publicstash;
 
 import me.axilirate.publicstash.commands.ps;
+import me.axilirate.publicstash.tasks.AutoClear;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -10,8 +12,10 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public final class PublicStash extends JavaPlugin {
@@ -28,6 +32,9 @@ public final class PublicStash extends JavaPlugin {
     public boolean despawnedItemsToStash = true;
     public String stashItemType = "CHEST";
     public boolean debugModeEnabled = false;
+    ArrayList<String> disabledDespawnedItemsToStash = new ArrayList<>();
+    ArrayList<String> disabledItems = new ArrayList<>();
+    public int autoClearTimeInTicks = 0;
 
 
     File translationFile = new File(this.getDataFolder() + "/language.yml");
@@ -39,8 +46,21 @@ public final class PublicStash extends JavaPlugin {
 
         FileConfiguration config = this.getConfig();
 
+        ArrayList<String> defaultDisabledDespawnedItemsToStash = new ArrayList<>();
+        defaultDisabledDespawnedItemsToStash.add("BEDROCK");
+        defaultDisabledDespawnedItemsToStash.add("BARRIER");
+
+        ArrayList<String> defaultDisabledItems = new ArrayList<>();
+        defaultDisabledItems.add("BEDROCK");
+        defaultDisabledItems.add("BARRIER");
+
+
+
         config.addDefault("stash-amount", 9);
+        config.addDefault("auto-clear-time-in-ticks", 0);
         config.addDefault("despawned-items-to-stash", true);
+        config.addDefault("disabled-despawned-items-to-stash", defaultDisabledDespawnedItemsToStash);
+        config.addDefault("disabled-items", defaultDisabledItems);
         config.addDefault("stash-item-type", "CHEST");
         config.addDefault("debug-mode-enabled", false);
 
@@ -54,6 +74,13 @@ public final class PublicStash extends JavaPlugin {
         despawnedItemsToStash = config.getBoolean("despawned-items-to-stash");
         stashItemType = config.getString("stash-item-type");
         debugModeEnabled = config.getBoolean("debug-mode-enabled");
+        autoClearTimeInTicks = config.getInt("auto-clear-time-in-ticks");
+
+
+        disabledDespawnedItemsToStash = (ArrayList<String>) config.getList("disabled-despawned-items-to-stash");
+        disabledItems = (ArrayList<String>) config.getList("disabled-items");
+
+
 
 
         if (stashAmount != 0){
@@ -63,29 +90,25 @@ public final class PublicStash extends JavaPlugin {
         if (debugModeEnabled){
             System.out.println("Stash amount is set to " + stashAmount);
             System.out.println("Inventory size is set to " + inventorySize);
-        }
-
-
-        if (translationYml.get("default.public-stash-title") == null){
-            translationYml.set("default.public-stash-title", "Public Stash");
-        }
-
-        if (translationYml.get("en_us.public-stash-title") == null){
-            translationYml.set("en_us.public-stash-title", "Public Stash");
+            System.out.println("Disabled despawned items to stash is set to " + disabledDespawnedItemsToStash);
+            System.out.println("Disabled items is set to " + disabledItems);
         }
 
 
 
-        if (translationYml.get("default.stash-name") == null){
-            translationYml.set("default.stash-name", "Stash");
-        }
+        translationYml.addDefault("default.public-stash-title", "&rPublic Stash");
+        translationYml.addDefault("en_us.public-stash-title", "&rPublic Stash");
+        translationYml.addDefault("zh_tw.public-stash-title", "&r公共倉庫");
+        translationYml.addDefault("de_de.public-stash-title", "&rÖffentlicher Vorrat");
 
 
-        if (translationYml.get("en_us.stash-name") == null){
-            translationYml.set("en_us.stash-name", "Stash");
-        }
 
+        translationYml.addDefault("default.stash-name", "&rStash");
+        translationYml.addDefault("en_us.stash-name", "&rStash");
+        translationYml.addDefault("zh_tw.stash-name", "&r倉庫");
+        translationYml.addDefault("de_de.stash-name", "&rVorrat");
 
+        translationYml.options().copyDefaults(true);
 
         dataManager.saveYamlFile(translationFile, translationYml);
 
@@ -94,6 +117,16 @@ public final class PublicStash extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new EventListener(this), this);
         this.getCommand("ps").setExecutor(new ps(this));
 
+
+
+        if (autoClearTimeInTicks > 0){
+            BukkitTask autoClear = new AutoClear(this).runTaskTimer(this, autoClearTimeInTicks, autoClearTimeInTicks);
+
+            if (debugModeEnabled){
+                System.out.println("Auto clear enabled");
+            }
+
+        }
 
 
     }
@@ -107,11 +140,17 @@ public final class PublicStash extends JavaPlugin {
 
         String language = player.getLocale();
 
-        String title = translationYml.getString(language + ".public-stash-title" );
-
+        String title =  translationYml.getString( language.toLowerCase() + ".public-stash-title" );
         if (title == null){
             title = translationYml.getString("default.public-stash-title");
         }
+
+        title = ChatColor.translateAlternateColorCodes('&', title);
+
+        if (debugModeEnabled){
+            System.out.println(player.getName() + " has opened the public stash with the title: " + title);
+        }
+
 
 
         Inventory publicStashInventory = Bukkit.createInventory(player, inventorySize, title);
@@ -121,12 +160,18 @@ public final class PublicStash extends JavaPlugin {
         ItemMeta stashItemMeta = stashItem.getItemMeta();
 
 
-        String stashTitle = translationYml.getString(language + ".stash-name" );
 
+        String stashTitle = translationYml.getString(language.toLowerCase() + ".stash-name" );
         if (stashTitle == null){
             stashTitle = translationYml.getString("default.stash-name");
         }
 
+        stashTitle = ChatColor.translateAlternateColorCodes('&', stashTitle);
+
+
+        if (debugModeEnabled){
+            System.out.println("and with stash title of: " + stashTitle);
+        }
 
 
         for (int i = 0; i < stashAmount; i++){

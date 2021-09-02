@@ -2,6 +2,7 @@ package me.axilirate.publicstash;
 
 import me.axilirate.publicstash.items.Back;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -70,14 +71,17 @@ public class DataManager {
 
         if (player != null){
 
+
             String language = player.getLocale();
             stashTitle = publicStash.translationYml.getString(language + ".stash-name" );
 
             if (stashTitle == null){
                 stashTitle = publicStash.translationYml.getString("default.stash-name");
             }
-        }
 
+            stashTitle = ChatColor.translateAlternateColorCodes('&', stashTitle);
+
+        }
 
 
 

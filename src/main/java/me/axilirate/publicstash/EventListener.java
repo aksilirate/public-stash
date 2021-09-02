@@ -34,12 +34,27 @@ public class EventListener implements Listener {
         }
 
 
+
         if (publicStash.playersOpenedStashIndex.containsKey(player)) {
 
             if (itemsTaken) {
                 event.setCancelled(true);
                 return;
             }
+
+            ItemStack currentItem = event.getCurrentItem();
+
+            if (currentItem != null){
+                String itemName = currentItem.getType().toString().toUpperCase();
+                if(publicStash.disabledItems.contains(itemName)){
+                    if(publicStash.debugModeEnabled){
+                        System.out.println("Disabled item on InventoryClickEvent: " + itemName);
+                    }
+                    event.setCancelled(true);
+                    return;
+                }
+            }
+
 
             if (event.getCurrentItem() != null) {
                 if (event.getCurrentItem().equals(Back.getItem())) {
@@ -82,6 +97,9 @@ public class EventListener implements Listener {
         event.setCancelled(true);
 
         if (event.getClickedInventory().equals(openedInventory)) {
+
+
+
             Inventory stashInventory = publicStash.dataManager.getYamlInventory(player, event.getSlot());
 
 
@@ -99,12 +117,28 @@ public class EventListener implements Listener {
     public void onInventoryDrag(InventoryDragEvent event) {
         Player player = (Player) event.getWhoClicked();
 
+
         if (publicStash.playersOpenedStashIndex.containsKey(player)) {
 
             if (itemsTaken) {
                 event.setCancelled(true);
                 return;
             }
+
+
+            ItemStack currentItem = event.getCursor();
+
+            if (currentItem != null){
+                String itemName = currentItem.getType().toString().toUpperCase();
+                if(publicStash.disabledItems.contains(itemName)){
+                    if(publicStash.debugModeEnabled){
+                        System.out.println("Disabled item on InventoryDragEvent: " + itemName);
+                    }
+                    event.setCancelled(true);
+                    return;
+                }
+            }
+
 
             itemsTaken = true;
             Bukkit.getScheduler().runTaskLater(publicStash, () -> {
@@ -136,6 +170,10 @@ public class EventListener implements Listener {
             return;
         }
 
+        if(publicStash.disabledDespawnedItemsToStash.contains(event.getEntity().getItemStack().getType().toString().toUpperCase())){
+            return;
+        }
+
 
         ItemStack itemStack = event.getEntity().getItemStack();
 
@@ -159,6 +197,9 @@ public class EventListener implements Listener {
         }
 
     }
+
+
+
 
 
     @EventHandler
