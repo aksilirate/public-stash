@@ -16,9 +16,6 @@ public class EventListener implements Listener {
     private final PublicStash publicStash;
 
 
-    boolean itemsTaken = false;
-
-
     public EventListener(PublicStash publicStash) {
         this.publicStash = publicStash;
     }
@@ -34,53 +31,51 @@ public class EventListener implements Listener {
         }
 
 
-
         if (publicStash.playersOpenedStashIndex.containsKey(player)) {
 
-            if (itemsTaken) {
+            ItemStack currentItem = event.getCurrentItem();
+
+            if (!publicStash.inventoryUpdated) {
                 event.setCancelled(true);
                 return;
             }
 
-            ItemStack currentItem = event.getCurrentItem();
 
-            if (currentItem != null){
+            if (currentItem != null) {
                 String itemName = currentItem.getType().toString().toUpperCase();
-                if(publicStash.disabledItems.contains(itemName)){
-                    if(publicStash.debugModeEnabled){
+                if (publicStash.disabledItems.contains(itemName)) {
+                    if (publicStash.debugModeEnabled) {
                         System.out.println("Disabled item on InventoryClickEvent: " + itemName);
                     }
                     event.setCancelled(true);
                     return;
                 }
-            }
 
-
-            if (event.getCurrentItem() != null) {
-                if (event.getCurrentItem().equals(Back.getItem())) {
+                if (currentItem.equals(Back.getItem())) {
                     event.setCancelled(true);
                     publicStash.openPublicStash(player);
                     return;
                 }
+
             }
 
-            itemsTaken = true;
-            Bukkit.getScheduler().runTaskLater(publicStash, () -> {
+            publicStash.inventoryUpdated = false;
 
-                if (!publicStash.playersOpenedStashIndex.containsKey(player)) {
-                    return;
-                }
+            Bukkit.getScheduler().runTaskLater(publicStash, () -> {
+                publicStash.inventoryUpdated = false;
 
                 int stashIndex = publicStash.playersOpenedStashIndex.get(player);
 
+                if (!publicStash.playersOpenedStashIndex.containsKey(player)) {
+
+
+                    return;
+                }
+
+
                 publicStash.dataManager.setYamlInventory(stashIndex, player.getOpenInventory().getTopInventory());
 
-                Bukkit.getScheduler().runTaskLater(publicStash, () -> {
-                    itemsTaken = false;
-                }, 20);
-
             }, 1);
-
 
         }
 
@@ -97,7 +92,6 @@ public class EventListener implements Listener {
         event.setCancelled(true);
 
         if (event.getClickedInventory().equals(openedInventory)) {
-
 
 
             Inventory stashInventory = publicStash.dataManager.getYamlInventory(player, event.getSlot());
@@ -120,18 +114,19 @@ public class EventListener implements Listener {
 
         if (publicStash.playersOpenedStashIndex.containsKey(player)) {
 
-            if (itemsTaken) {
+
+            ItemStack currentItem = event.getCursor();
+
+
+            if (!publicStash.inventoryUpdated) {
                 event.setCancelled(true);
                 return;
             }
 
-
-            ItemStack currentItem = event.getCursor();
-
-            if (currentItem != null){
+            if (currentItem != null) {
                 String itemName = currentItem.getType().toString().toUpperCase();
-                if(publicStash.disabledItems.contains(itemName)){
-                    if(publicStash.debugModeEnabled){
+                if (publicStash.disabledItems.contains(itemName)) {
+                    if (publicStash.debugModeEnabled) {
                         System.out.println("Disabled item on InventoryDragEvent: " + itemName);
                     }
                     event.setCancelled(true);
@@ -140,20 +135,19 @@ public class EventListener implements Listener {
             }
 
 
-            itemsTaken = true;
+            publicStash.inventoryUpdated = false;
+
             Bukkit.getScheduler().runTaskLater(publicStash, () -> {
+                publicStash.inventoryUpdated = false;
+
+                int stashIndex = publicStash.playersOpenedStashIndex.get(player);
 
                 if (!publicStash.playersOpenedStashIndex.containsKey(player)) {
                     return;
                 }
 
-                int stashIndex = publicStash.playersOpenedStashIndex.get(player);
-
                 publicStash.dataManager.setYamlInventory(stashIndex, player.getOpenInventory().getTopInventory());
 
-                Bukkit.getScheduler().runTaskLater(publicStash, () -> {
-                    itemsTaken = false;
-                }, 20);
 
             }, 1);
 
@@ -170,7 +164,7 @@ public class EventListener implements Listener {
             return;
         }
 
-        if(publicStash.disabledDespawnedItemsToStash.contains(event.getEntity().getItemStack().getType().toString().toUpperCase())){
+        if (publicStash.disabledDespawnedItemsToStash.contains(event.getEntity().getItemStack().getType().toString().toUpperCase())) {
             return;
         }
 
@@ -197,9 +191,6 @@ public class EventListener implements Listener {
         }
 
     }
-
-
-
 
 
     @EventHandler

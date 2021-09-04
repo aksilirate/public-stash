@@ -27,6 +27,8 @@ public final class PublicStash extends JavaPlugin {
     public HashMap<Player,Integer> playersOpenedStashIndex = new HashMap<>();
 
 
+    public boolean inventoryUpdated = true;
+
     public int inventorySize = 9;
     public int stashAmount;
     public boolean despawnedItemsToStash = true;
@@ -221,6 +223,13 @@ public final class PublicStash extends JavaPlugin {
 
             }
         }
+
+        inventoryUpdated = true;
+
+        if (debugModeEnabled){
+            System.out.println("Stash " + stashIndex + " was updated");
+        }
+
     }
 
     @Override
