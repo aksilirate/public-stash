@@ -176,8 +176,14 @@ public class EventListener implements Listener {
 
             for (int itemIndex = 0; itemIndex < 54; itemIndex++) {
 
-                if (stashInventory.getItem(itemIndex) != null) {
-                    if (stashInventory.getItem(itemIndex).getType().equals(itemStack.getType()) && stashInventory.getItem(itemIndex).getAmount() + itemStack.getAmount() > 64) {
+                ItemStack stashItem = stashInventory.getItem(itemIndex);
+
+                if (stashItem != null) {
+                    if (stashItem.getType().equals(itemStack.getType()) && stashItem.getAmount() + itemStack.getAmount() > 64) {
+                        continue;
+                    }
+
+                    if (!stashItem.getType().equals(itemStack.getType())){
                         continue;
                     }
                 }
