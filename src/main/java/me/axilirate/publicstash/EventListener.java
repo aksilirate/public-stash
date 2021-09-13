@@ -64,14 +64,13 @@ public class EventListener implements Listener {
             Bukkit.getScheduler().runTaskLater(publicStash, () -> {
                 publicStash.inventoryUpdated = false;
 
-                int stashIndex = publicStash.playersOpenedStashIndex.get(player);
 
                 if (!publicStash.playersOpenedStashIndex.containsKey(player)) {
-
 
                     return;
                 }
 
+                int stashIndex = publicStash.playersOpenedStashIndex.get(player);
 
                 publicStash.dataManager.setYamlInventory(stashIndex, player.getOpenInventory().getTopInventory());
 
@@ -140,12 +139,13 @@ public class EventListener implements Listener {
             Bukkit.getScheduler().runTaskLater(publicStash, () -> {
                 publicStash.inventoryUpdated = false;
 
-                int stashIndex = publicStash.playersOpenedStashIndex.get(player);
+
 
                 if (!publicStash.playersOpenedStashIndex.containsKey(player)) {
                     return;
                 }
 
+                int stashIndex = publicStash.playersOpenedStashIndex.get(player);
                 publicStash.dataManager.setYamlInventory(stashIndex, player.getOpenInventory().getTopInventory());
 
 
